@@ -1,0 +1,9 @@
+{
+    "scripts": {
+        "prebuild": "swiftc assets/get-contacts.swift -o assets/get-contacts -O",
+        "build": "ray build -e dist",
+        "dev": "ray develop",
+        "fix-lint": "ray lint --fix",
+        "lint": "ray lint"
+    }
+}

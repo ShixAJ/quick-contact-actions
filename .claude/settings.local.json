@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//Users/shix/.claude/**)",
+      "Bash(ls ~/.claude/plugins/*/skills/)",
+      "Bash(npm install:*)",
+      "Bash(head -5 grep -rn \"getContacts\\\\|Contact\" /Users/shix/Projects/quick-contact-actions/node_modules/@raycast/api/dist/ --include=*.d.ts)",
+      "Bash(ls /Users/shix/Projects/quick-contact-actions/node_modules/@raycast/utils/ grep -rn \"Contact\\\\|contact\" /Users/shix/Projects/quick-contact-actions/node_modules/@raycast/utils/types/)",
+      "Bash(npm run:*)",
+      "Bash(swift --version)",
+      "Bash(git init:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
+    ]
+  }
+}
