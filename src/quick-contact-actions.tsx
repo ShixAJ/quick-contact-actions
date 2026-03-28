@@ -346,13 +346,13 @@ export default function Command(props: { arguments: { contact?: string } }) {
         actions={
           <ActionPanel>
             <ActionPanel.Section>
-              <Action.Push
+              <Action
                 title="Show Actions"
-                target={<ContactActions contact={contact} />}
                 icon={Icon.ChevronRight}
                 onAction={() => {
                   incrementFrequency(contact.id);
                   setFrequency((prev) => ({ ...prev, [contact.id]: (prev[contact.id] ?? 0) + 1 }));
+                  push(<ContactActions contact={contact} />);
                 }}
               />
               {contact.phones.length > 0 && (
