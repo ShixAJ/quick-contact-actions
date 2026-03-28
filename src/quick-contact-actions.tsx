@@ -1,4 +1,4 @@
-import { Action, ActionPanel, environment, Icon, Image, List, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Cache, environment, Icon, Image, List, useNavigation } from "@raycast/api";
 import { getAvatarIcon } from "@raycast/utils";
 import { execFile } from "child_process";
 import { join } from "path";
@@ -158,6 +158,9 @@ function ContactActions({ contact }: { contact: Contact }) {
   );
 }
 
+const cache = new Cache();
+const CACHE_KEY = "contacts";
+
 function contactSubtitle(contact: Contact): string {
   if (contact.phones.length > 0) return contact.phones[0].value;
   if (contact.emails.length > 0) return contact.emails[0].value;
@@ -174,8 +177,20 @@ export default function Command(props: { arguments: { contact?: string } }) {
   const didAutoNav = useRef(false);
 
   useEffect(() => {
+    const cached = cache.get(CACHE_KEY);
+    if (cached) {
+      try {
+        setContacts(JSON.parse(cached));
+        setIsLoading(false);
+      } catch {
+        /* ignore bad cache */
+      }
+    }
     fetchContacts()
-      .then(setContacts)
+      .then((fresh) => {
+        setContacts(fresh);
+        cache.set(CACHE_KEY, JSON.stringify(fresh));
+      })
       .catch((e: Error) => setError(e.message ?? "Failed to load contacts"))
       .finally(() => setIsLoading(false));
   }, []);
