@@ -459,7 +459,8 @@ export default function Command(props: { arguments: { contact?: string } }) {
           ) : (
             Object.entries(
               remainingContacts.reduce<Record<string, Contact[]>>((acc, c) => {
-                const letter = c.name[0]?.toUpperCase() || "#";
+                const first = c.name[0]?.toUpperCase() || "#";
+                const letter = first >= "A" && first <= "Z" ? first : "#";
                 (acc[letter] ??= []).push(c);
                 return acc;
               }, {}),
