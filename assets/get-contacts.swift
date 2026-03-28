@@ -22,6 +22,32 @@ func makeCircularImage(from data: Data, size: Int) -> Data? {
   return outData as Data
 }
 
+// Handle open/edit mode — reveal contact in Contacts.app
+if CommandLine.arguments.count > 2 && (CommandLine.arguments[1] == "--open" || CommandLine.arguments[1] == "--edit") {
+  let isEdit = CommandLine.arguments[1] == "--edit"
+  let contactId = CommandLine.arguments[2]
+  let openStore = CNContactStore()
+  do {
+    let keys = [CNContactGivenNameKey as CNKeyDescriptor, CNContactFamilyNameKey as CNKeyDescriptor]
+    let contact = try openStore.unifiedContact(withIdentifier: contactId, keysToFetch: keys)
+    let name = "\(contact.givenName) \(contact.familyName)".trimmingCharacters(in: .whitespaces)
+    let escaped = name.replacingOccurrences(of: "\"", with: "\\\"")
+    var script = "tell application \"Contacts\"\nset thePeople to every person whose name is \"\(escaped)\"\nif (count of thePeople) > 0 then\nset selection to item 1 of thePeople\nend if\nactivate\nend tell"
+    if isEdit {
+      script += "\ndelay 0.1\ntell application \"System Events\" to keystroke \"l\" using command down"
+    }
+    let proc = Process()
+    proc.executableURL = URL(fileURLWithPath: "/usr/bin/osascript")
+    proc.arguments = ["-e", script]
+    try proc.run()
+    proc.waitUntilExit()
+  } catch {
+    fputs("error: \(error.localizedDescription)\n", stderr)
+    exit(1)
+  }
+  exit(0)
+}
+
 // Image cache dir passed as first argument (environment.supportPath from Raycast)
 let imageDir = CommandLine.arguments.count > 1 ? CommandLine.arguments[1] : NSTemporaryDirectory()
 let imageDirURL = URL(fileURLWithPath: imageDir, isDirectory: true)

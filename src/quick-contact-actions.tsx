@@ -284,7 +284,8 @@ export default function Command(props: { arguments: { contact?: string } }) {
     const cached = cache.get(CACHE_KEY);
     if (cached) {
       try {
-        const parsedContacts = JSON.parse(cached) as Contact[];
+        const parsedContacts = JSON.parse(cached);
+        if (!Array.isArray(parsedContacts)) throw new Error("invalid cache");
         Promise.all([freqPromise, favsPromise]).then(([freq, favs]) => {
           setFrequency(freq);
           setFavorites(favs);
@@ -292,6 +293,7 @@ export default function Command(props: { arguments: { contact?: string } }) {
           setIsLoading(false);
         });
       } catch {
+        cache.remove(CACHE_KEY);
         Promise.all([freqPromise, favsPromise]).then(([freq, favs]) => {
           setFrequency(freq);
           setFavorites(favs);
@@ -466,17 +468,21 @@ export default function Command(props: { arguments: { contact?: string } }) {
                   shortcut={{ modifiers: ["cmd"], key: "e" }}
                 />
               )}
-              <Action.Open
+              <Action
                 title="Open in Contacts"
                 icon={Icon.AddressBook}
-                target={`addressbook://${contact.id}`}
                 shortcut={{ modifiers: ["cmd"], key: "o" }}
+                onAction={() => {
+                  execFile(join(environment.assetsPath, "get-contacts"), ["--open", contact.id], { timeout: 5000 }, () => {});
+                }}
               />
-              <Action.Open
+              <Action
                 title="Edit in Contacts"
                 icon={Icon.Pencil}
-                target={`addressbook://${contact.id}?edit`}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+                onAction={() => {
+                  execFile(join(environment.assetsPath, "get-contacts"), ["--edit", contact.id], { timeout: 5000 }, () => {});
+                }}
               />
               <Action
                 title="Toggle Detail"
