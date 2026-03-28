@@ -454,12 +454,20 @@ export default function Command(props: { arguments: { contact?: string } }) {
               {frequentContacts.map((contact) => renderContactItem(contact))}
             </List.Section>
           )}
-          {searchText || frequentContacts.length === 0 ? (
+          {searchText ? (
             displayedContacts.map((contact) => renderContactItem(contact))
           ) : (
-            <List.Section title="All Contacts">
-              {remainingContacts.map((contact) => renderContactItem(contact))}
-            </List.Section>
+            Object.entries(
+              remainingContacts.reduce<Record<string, Contact[]>>((acc, c) => {
+                const letter = c.name[0]?.toUpperCase() || "#";
+                (acc[letter] ??= []).push(c);
+                return acc;
+              }, {}),
+            ).map(([letter, group]) => (
+              <List.Section key={letter} title={letter}>
+                {group.map((contact) => renderContactItem(contact))}
+              </List.Section>
+            ))
           )}
         </>
       )}
