@@ -229,6 +229,25 @@ function getNameSvg(name: string, org?: string): string {
 }
 
 const FREQ_KEY = "contact-frequency";
+const FAVS_KEY = "contact-favorites";
+
+async function getFavorites(): Promise<Set<string>> {
+  const raw = await LocalStorage.getItem<string>(FAVS_KEY);
+  if (!raw) return new Set();
+  try {
+    return new Set(JSON.parse(raw) as string[]);
+  } catch {
+    return new Set();
+  }
+}
+
+async function toggleFavorite(contactId: string): Promise<Set<string>> {
+  const favs = await getFavorites();
+  if (favs.has(contactId)) favs.delete(contactId);
+  else favs.add(contactId);
+  await LocalStorage.setItem(FAVS_KEY, JSON.stringify([...favs]));
+  return favs;
+}
 
 async function getFrequency(): Promise<Record<string, number>> {
   const raw = await LocalStorage.getItem<string>(FREQ_KEY);
@@ -254,26 +273,35 @@ export default function Command(props: { arguments: { contact?: string } }) {
   const [error, setError] = useState<string | undefined>();
   const [showDetail, setShowDetail] = useState(false);
   const [frequency, setFrequency] = useState<Record<string, number>>({});
+  const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const { push } = useNavigation();
   const didAutoNav = useRef(false);
 
   useEffect(() => {
     const freqPromise = getFrequency();
+    const favsPromise = getFavorites();
 
     const cached = cache.get(CACHE_KEY);
     if (cached) {
       try {
         const parsedContacts = JSON.parse(cached) as Contact[];
-        freqPromise.then((freq) => {
+        Promise.all([freqPromise, favsPromise]).then(([freq, favs]) => {
           setFrequency(freq);
+          setFavorites(favs);
           setContacts(parsedContacts);
           setIsLoading(false);
         });
       } catch {
-        freqPromise.then(setFrequency);
+        Promise.all([freqPromise, favsPromise]).then(([freq, favs]) => {
+          setFrequency(freq);
+          setFavorites(favs);
+        });
       }
     } else {
-      freqPromise.then(setFrequency);
+      Promise.all([freqPromise, favsPromise]).then(([freq, favs]) => {
+        setFrequency(freq);
+        setFavorites(favs);
+      });
     }
 
     fetchContacts()
@@ -320,14 +348,20 @@ export default function Command(props: { arguments: { contact?: string } }) {
         .map(({ contact }) => contact)
     : contacts;
 
+  const favoriteContacts = !searchText
+    ? [...displayedContacts]
+        .filter((c) => favorites.has(c.id))
+        .sort((a, b) => a.name.localeCompare(b.name))
+    : [];
+  const favoriteIds = new Set(favoriteContacts.map((c) => c.id));
   const frequentContacts = !searchText
     ? [...displayedContacts]
-        .filter((c) => (frequency[c.id] ?? 0) > 0)
+        .filter((c) => (frequency[c.id] ?? 0) > 0 && !favoriteIds.has(c.id))
         .sort((a, b) => (frequency[b.id] ?? 0) - (frequency[a.id] ?? 0))
         .slice(0, 5)
     : [];
   const frequentIds = new Set(frequentContacts.map((c) => c.id));
-  const remainingContacts = displayedContacts.filter((c) => !frequentIds.has(c.id));
+  const remainingContacts = displayedContacts.filter((c) => !favoriteIds.has(c.id) && !frequentIds.has(c.id));
 
   function renderContactItem(contact: Contact) {
     return (
@@ -450,6 +484,15 @@ export default function Command(props: { arguments: { contact?: string } }) {
                 onAction={() => setShowDetail((prev) => !prev)}
                 shortcut={{ modifiers: ["cmd"], key: "d" }}
               />
+              <Action
+                title={favorites.has(contact.id) ? "Remove from Favorites" : "Add to Favorites"}
+                icon={Icon.Star}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+                onAction={async () => {
+                  const updated = await toggleFavorite(contact.id);
+                  setFavorites(new Set(updated));
+                }}
+              />
             </ActionPanel.Section>
             <ActionPanel.Section title="Copy">
               <Action.CopyToClipboard
@@ -492,6 +535,11 @@ export default function Command(props: { arguments: { contact?: string } }) {
         <List.EmptyView title="No contacts found" icon={Icon.MagnifyingGlass} />
       ) : (
         <>
+          {!searchText && favoriteContacts.length > 0 && (
+            <List.Section title="Favorites">
+              {favoriteContacts.map((contact) => renderContactItem(contact))}
+            </List.Section>
+          )}
           {!searchText && frequentContacts.length > 0 && (
             <List.Section title="Frequently Contacted">
               {frequentContacts.map((contact) => renderContactItem(contact))}
