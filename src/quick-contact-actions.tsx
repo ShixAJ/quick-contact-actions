@@ -20,10 +20,10 @@ interface Contact {
 // Uses a bundled Swift script that calls CNContactStore directly.
 // This uses the native Contacts permission (no Automation permission needed).
 async function fetchContacts(): Promise<Contact[]> {
-  const scriptPath = join(environment.assetsPath, "get-contacts.swift");
+  const binaryPath = join(environment.assetsPath, "get-contacts");
   const imageDir = join(environment.supportPath, "avatars");
   const json = await new Promise<string>((resolve, reject) => {
-    execFile("/usr/bin/swift", [scriptPath, imageDir], { timeout: 20000 }, (err, stdout, stderr) => {
+    execFile(binaryPath, [imageDir], { timeout: 10000 }, (err, stdout, stderr) => {
       if (err) reject(new Error(stderr || err.message));
       else resolve(stdout);
     });

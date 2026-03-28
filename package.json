@@ -44,6 +44,7 @@
     "typescript": "^5.8.2"
   },
   "scripts": {
+    "prebuild": "swiftc assets/get-contacts.swift -o assets/get-contacts -O",
     "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
