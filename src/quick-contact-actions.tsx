@@ -224,11 +224,13 @@ export default function Command(props: { arguments: { contact?: string } }) {
   const didAutoNav = useRef(false);
 
   useEffect(() => {
+    const freqPromise = getFrequency().then(setFrequency);
+
     const cached = cache.get(CACHE_KEY);
     if (cached) {
       try {
         setContacts(JSON.parse(cached));
-        setIsLoading(false);
+        freqPromise.then(() => setIsLoading(false));
       } catch {
         /* ignore bad cache */
       }
@@ -240,10 +242,6 @@ export default function Command(props: { arguments: { contact?: string } }) {
       })
       .catch((e: Error) => setError(e.message ?? "Failed to load contacts"))
       .finally(() => setIsLoading(false));
-  }, []);
-
-  useEffect(() => {
-    getFrequency().then(setFrequency);
   }, []);
 
   // Auto-navigate when argument provided and exactly one contact matches
