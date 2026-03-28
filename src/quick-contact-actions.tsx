@@ -301,10 +301,10 @@ export default function Command(props: { arguments: { contact?: string } }) {
           !showDetail
             ? [
                 ...(contact.phones.length > 0
-                  ? [{ tag: { value: contact.phones[0].label, color: Color.Orange } }]
+                  ? [{ icon: Icon.Phone, tooltip: `${contact.phones.length} phone(s)` }]
                   : []),
                 ...(contact.emails.length > 0
-                  ? [{ tag: { value: contact.emails[0].label, color: Color.Purple } }]
+                  ? [{ icon: Icon.Envelope, tooltip: `${contact.emails.length} email(s)` }]
                   : []),
               ]
             : undefined
@@ -323,21 +323,15 @@ export default function Command(props: { arguments: { contact?: string } }) {
                 />
                 <List.Item.Detail.Metadata.Separator />
                 {contact.phones.map((phone, i) => (
-                  <List.Item.Detail.Metadata.Label
-                    key={`phone-${i}`}
-                    title={phone.label}
-                    text={phone.value}
-                    icon={{ source: Icon.Phone, tintColor: Color.Orange }}
-                  />
+                  <List.Item.Detail.Metadata.TagList key={`phone-${i}`} title={phone.value}>
+                    <List.Item.Detail.Metadata.TagList.Item text={phone.label} color={Color.Orange} />
+                  </List.Item.Detail.Metadata.TagList>
                 ))}
                 {contact.phones.length > 0 && contact.emails.length > 0 && <List.Item.Detail.Metadata.Separator />}
                 {contact.emails.map((email, i) => (
-                  <List.Item.Detail.Metadata.Label
-                    key={`email-${i}`}
-                    title={email.label}
-                    text={email.value}
-                    icon={{ source: Icon.Envelope, tintColor: Color.Purple }}
-                  />
+                  <List.Item.Detail.Metadata.TagList key={`email-${i}`} title={email.value}>
+                    <List.Item.Detail.Metadata.TagList.Item text={email.label} color={Color.Purple} />
+                  </List.Item.Detail.Metadata.TagList>
                 ))}
               </List.Item.Detail.Metadata>
             }
