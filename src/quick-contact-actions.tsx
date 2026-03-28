@@ -198,8 +198,7 @@ function contactSubtitle(contact: Contact): string {
 
 function getInitialsSvg(name: string): string {
   const words = name.split(" ").filter(Boolean);
-  const initials =
-    words.length >= 2 ? (words[0][0] + words[1][0]).toUpperCase() : (words[0]?.[0] ?? "?").toUpperCase();
+  const initials = words.length >= 2 ? (words[0][0] + words[1][0]).toUpperCase() : (words[0]?.[0] ?? "?").toUpperCase();
   const colors = ["#FF6363", "#4A90D9", "#50C878", "#FF8C00", "#9B59B6", "#E91E8E", "#2AA198", "#5856D6"];
   const hash = [...name].reduce((acc, c) => (acc * 31 + c.charCodeAt(0)) | 0, 0);
   const bg = colors[Math.abs(hash) % colors.length];
@@ -222,7 +221,9 @@ function getNameSvg(name: string, org?: string): string {
   const svg = [
     `<svg xmlns="http://www.w3.org/2000/svg" width="300" height="${height}">`,
     `<text x="150" y="${nameY}" text-anchor="middle" dy="0.35em" font-family="-apple-system,BlinkMacSystemFont,sans-serif" font-size="16" font-weight="600" fill="white">${escapedName}</text>`,
-    hasOrg ? `<text x="150" y="${orgY}" text-anchor="middle" dy="0.35em" font-family="-apple-system,BlinkMacSystemFont,sans-serif" font-size="13" font-weight="400" fill="#999">${escapedOrg}</text>` : "",
+    hasOrg
+      ? `<text x="150" y="${orgY}" text-anchor="middle" dy="0.35em" font-family="-apple-system,BlinkMacSystemFont,sans-serif" font-size="13" font-weight="400" fill="#999">${escapedOrg}</text>`
+      : "",
     `</svg>`,
   ].join("");
   return `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`;
@@ -351,9 +352,7 @@ export default function Command(props: { arguments: { contact?: string } }) {
     : contacts;
 
   const favoriteContacts = !searchText
-    ? [...displayedContacts]
-        .filter((c) => favorites.has(c.id))
-        .sort((a, b) => a.name.localeCompare(b.name))
+    ? [...displayedContacts].filter((c) => favorites.has(c.id)).sort((a, b) => a.name.localeCompare(b.name))
     : [];
   const favoriteIds = new Set(favoriteContacts.map((c) => c.id));
   const frequentContacts = !searchText
@@ -473,7 +472,12 @@ export default function Command(props: { arguments: { contact?: string } }) {
                 icon={Icon.AddressBook}
                 shortcut={{ modifiers: ["cmd"], key: "o" }}
                 onAction={() => {
-                  execFile(join(environment.assetsPath, "get-contacts"), ["--open", contact.id], { timeout: 5000 }, () => {});
+                  execFile(
+                    join(environment.assetsPath, "get-contacts"),
+                    ["--open", contact.id],
+                    { timeout: 5000 },
+                    () => {},
+                  );
                 }}
               />
               <Action
@@ -481,7 +485,12 @@ export default function Command(props: { arguments: { contact?: string } }) {
                 icon={Icon.Pencil}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
                 onAction={() => {
-                  execFile(join(environment.assetsPath, "get-contacts"), ["--edit", contact.id], { timeout: 5000 }, () => {});
+                  execFile(
+                    join(environment.assetsPath, "get-contacts"),
+                    ["--edit", contact.id],
+                    { timeout: 5000 },
+                    () => {},
+                  );
                 }}
               />
               <Action
@@ -551,22 +560,20 @@ export default function Command(props: { arguments: { contact?: string } }) {
               {frequentContacts.map((contact) => renderContactItem(contact))}
             </List.Section>
           )}
-          {searchText ? (
-            displayedContacts.map((contact) => renderContactItem(contact))
-          ) : (
-            Object.entries(
-              remainingContacts.reduce<Record<string, Contact[]>>((acc, c) => {
-                const first = c.name[0]?.toUpperCase() || "#";
-                const letter = first >= "A" && first <= "Z" ? first : "#";
-                (acc[letter] ??= []).push(c);
-                return acc;
-              }, {}),
-            ).map(([letter, group]) => (
-              <List.Section key={letter} title={letter}>
-                {group.map((contact) => renderContactItem(contact))}
-              </List.Section>
-            ))
-          )}
+          {searchText
+            ? displayedContacts.map((contact) => renderContactItem(contact))
+            : Object.entries(
+                remainingContacts.reduce<Record<string, Contact[]>>((acc, c) => {
+                  const first = c.name[0]?.toUpperCase() || "#";
+                  const letter = first >= "A" && first <= "Z" ? first : "#";
+                  (acc[letter] ??= []).push(c);
+                  return acc;
+                }, {}),
+              ).map(([letter, group]) => (
+                <List.Section key={letter} title={letter}>
+                  {group.map((contact) => renderContactItem(contact))}
+                </List.Section>
+              ))}
         </>
       )}
     </List>
