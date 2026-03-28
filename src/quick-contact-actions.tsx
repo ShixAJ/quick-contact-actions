@@ -256,70 +256,74 @@ export default function Command(props: { arguments: { contact?: string } }) {
             }
             actions={
               <ActionPanel>
-                <Action.Push
-                  title="Show Actions"
-                  target={<ContactActions contact={contact} />}
-                  icon={Icon.ChevronRight}
-                />
-                {contact.phones.length > 0 && (
-                  <Action.Open
-                    title="FaceTime Video"
-                    icon={Icon.Video}
-                    target={`facetime://${contact.phones[0].value.replace(/\s/g, "")}`}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
+                <ActionPanel.Section>
+                  <Action.Push
+                    title="Show Actions"
+                    target={<ContactActions contact={contact} />}
+                    icon={Icon.ChevronRight}
                   />
-                )}
-                {contact.phones.length > 0 && (
-                  <Action.Open
-                    title="FaceTime Audio"
-                    icon={Icon.Phone}
-                    target={`facetime-audio://${contact.phones[0].value.replace(/\s/g, "")}`}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
-                  />
-                )}
-                {contact.phones.length > 0 && (
-                  <Action.Open
-                    title="Call"
-                    icon={Icon.Mobile}
-                    target={`tel:${contact.phones[0].value.replace(/[^+\d]/g, "")}`}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-                  />
-                )}
-                {contact.phones.length > 0 && (
-                  <Action.Open
-                    title="Send Message"
-                    icon={Icon.Message}
-                    target={`sms:${contact.phones[0].value.replace(/[^+\d]/g, "")}`}
-                    shortcut={{ modifiers: ["cmd"], key: "m" }}
-                  />
-                )}
-                {contact.emails.length > 0 && (
-                  <Action.Open
-                    title="Send Email"
-                    icon={Icon.Envelope}
-                    target={`mailto:${contact.emails[0].value}`}
-                    shortcut={{ modifiers: ["cmd"], key: "e" }}
-                  />
-                )}
-                <Action.CopyToClipboard
-                  title="Copy Name"
-                  content={contact.name}
-                  shortcut={{ modifiers: ["cmd"], key: "." }}
-                />
-                {contact.phones.length > 0 && (
+                  {contact.phones.length > 0 && (
+                    <Action.Open
+                      title="FaceTime Video"
+                      icon={Icon.Video}
+                      target={`facetime://${contact.phones[0].value.replace(/\s/g, "")}`}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
+                    />
+                  )}
+                  {contact.phones.length > 0 && (
+                    <Action.Open
+                      title="FaceTime Audio"
+                      icon={Icon.Phone}
+                      target={`facetime-audio://${contact.phones[0].value.replace(/\s/g, "")}`}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+                    />
+                  )}
+                  {contact.phones.length > 0 && (
+                    <Action.Open
+                      title="Call"
+                      icon={Icon.Mobile}
+                      target={`tel:${contact.phones[0].value.replace(/[^+\d]/g, "")}`}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                    />
+                  )}
+                  {contact.phones.length > 0 && (
+                    <Action.Open
+                      title="Send Message"
+                      icon={Icon.Message}
+                      target={`sms:${contact.phones[0].value.replace(/[^+\d]/g, "")}`}
+                      shortcut={{ modifiers: ["cmd"], key: "m" }}
+                    />
+                  )}
+                  {contact.emails.length > 0 && (
+                    <Action.Open
+                      title="Send Email"
+                      icon={Icon.Envelope}
+                      target={`mailto:${contact.emails[0].value}`}
+                      shortcut={{ modifiers: ["cmd"], key: "e" }}
+                    />
+                  )}
+                </ActionPanel.Section>
+                <ActionPanel.Section title="Copy">
                   <Action.CopyToClipboard
-                    title="Copy Phone Number"
-                    content={contact.phones[0].value}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
+                    title="Copy Name"
+                    content={contact.name}
+                    shortcut={{ modifiers: ["cmd"], key: "." }}
                   />
-                )}
-                {contact.emails.length > 0 && (
-                  <Action.CopyToClipboard
-                    title="Copy Email"
-                    content={contact.emails[0].value}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
-                  />
-                )}
+                  {contact.phones.length > 0 && (
+                    <Action.CopyToClipboard
+                      title="Copy Phone Number"
+                      content={contact.phones[0].value}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
+                    />
+                  )}
+                  {contact.emails.length > 0 && (
+                    <Action.CopyToClipboard
+                      title="Copy Email"
+                      content={contact.emails[0].value}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
+                    />
+                  )}
+                </ActionPanel.Section>
               </ActionPanel>
             }
           />
