@@ -15,3 +15,7 @@ assets/get-contacts
 
 # misc
 .DS_Store
+
+# Claude Code
+.claude/
+CLAUDE.md
