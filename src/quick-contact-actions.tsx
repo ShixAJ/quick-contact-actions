@@ -227,24 +227,24 @@ export default function Command(props: { arguments: { contact?: string } }) {
   // Score: 3 = exact name, 2 = name starts with, 1 = word starts with, 0 = name substring, -1 = phone/email match.
   const displayedContacts = searchText
     ? contacts
-        .flatMap((c) => {
-          const lower = c.name.toLowerCase();
-          const q = searchText.toLowerCase();
-          let score: number;
-          if (lower === q) score = 3;
-          else if (lower.startsWith(q)) score = 2;
-          else if (lower.split(" ").some((w) => w.startsWith(q))) score = 1;
-          else if (lower.includes(q)) score = 0;
-          else {
-            const qDigits = q.replace(/\D/g, "");
-            if (qDigits.length >= 3 && c.phones.some((p) => p.value.replace(/\D/g, "").includes(qDigits))) score = -1;
-            else if (c.emails.some((e) => e.value.toLowerCase().includes(q))) score = -1;
-            else return [];
-          }
-          return [{ contact: c, score }];
-        })
-        .sort((a, b) => b.score - a.score)
-        .map(({ contact }) => contact)
+      .flatMap((c) => {
+        const lower = c.name.toLowerCase();
+        const q = searchText.toLowerCase();
+        let score: number;
+        if (lower === q) score = 3;
+        else if (lower.startsWith(q)) score = 2;
+        else if (lower.split(" ").some((w) => w.startsWith(q))) score = 1;
+        else if (lower.includes(q)) score = 0;
+        else {
+          const qDigits = q.replace(/\D/g, "");
+          if (qDigits.length >= 3 && c.phones.some((p) => p.value.replace(/\D/g, "").includes(qDigits))) score = -1;
+          else if (c.emails.some((e) => e.value.toLowerCase().includes(q))) score = -1;
+          else return [];
+        }
+        return [{ contact: c, score }];
+      })
+      .sort((a, b) => b.score - a.score)
+      .map(({ contact }) => contact)
     : contacts;
 
   return (
@@ -271,49 +271,47 @@ export default function Command(props: { arguments: { contact?: string } }) {
             accessories={
               !showDetail
                 ? [
-                    ...(contact.phones.length > 0
-                      ? [{ icon: Icon.Phone, tooltip: `${contact.phones.length} phone(s)` }]
-                      : []),
-                    ...(contact.emails.length > 0
-                      ? [{ icon: Icon.Envelope, tooltip: `${contact.emails.length} email(s)` }]
-                      : []),
-                  ]
+                  ...(contact.phones.length > 0
+                    ? [{ icon: Icon.Phone, tooltip: `${contact.phones.length} phone(s)` }]
+                    : []),
+                  ...(contact.emails.length > 0
+                    ? [{ icon: Icon.Envelope, tooltip: `${contact.emails.length} email(s)` }]
+                    : []),
+                ]
                 : undefined
             }
             detail={
               <List.Item.Detail
-                markdown={
-                  contact.imagePath
-                    ? `![](file://${encodeURI(contact.imagePath)})\n\n**${contact.name}**`
-                    : `**${contact.name}**`
-                }
                 metadata={
                   <List.Item.Detail.Metadata>
-                    {contact.phones.length > 0 && (
-                      <>
-                        {contact.phones.map((phone, i) => (
-                          <List.Item.Detail.Metadata.Label
-                            key={`phone-${i}`}
-                            title={phone.label}
-                            text={phone.value}
-                            icon={{ source: Icon.Phone, tintColor: Color.Orange }}
-                          />
-                        ))}
-                      </>
+                    <List.Item.Detail.Metadata.Label
+                      title={contact.name}
+                      icon={
+                        contact.imagePath
+                          ? { source: contact.imagePath, mask: Image.Mask.Circle }
+                          : getAvatarIcon(contact.name)
+                      }
+                    />
+                    <List.Item.Detail.Metadata.Separator />
+                    {contact.phones.map((phone, i) => (
+                      <List.Item.Detail.Metadata.Label
+                        key={`phone-${i}`}
+                        title={phone.label}
+                        text={phone.value}
+                        icon={{ source: Icon.Phone, tintColor: Color.Orange }}
+                      />
+                    ))}
+                    {contact.phones.length > 0 && contact.emails.length > 0 && (
+                      <List.Item.Detail.Metadata.Separator />
                     )}
-                    {contact.phones.length > 0 && contact.emails.length > 0 && <List.Item.Detail.Metadata.Separator />}
-                    {contact.emails.length > 0 && (
-                      <>
-                        {contact.emails.map((email, i) => (
-                          <List.Item.Detail.Metadata.Label
-                            key={`email-${i}`}
-                            title={email.label}
-                            text={email.value}
-                            icon={{ source: Icon.Envelope, tintColor: Color.Purple }}
-                          />
-                        ))}
-                      </>
-                    )}
+                    {contact.emails.map((email, i) => (
+                      <List.Item.Detail.Metadata.Label
+                        key={`email-${i}`}
+                        title={email.label}
+                        text={email.value}
+                        icon={{ source: Icon.Envelope, tintColor: Color.Purple }}
+                      />
+                    ))}
                   </List.Item.Detail.Metadata>
                 }
               />
