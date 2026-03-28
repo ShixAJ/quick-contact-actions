@@ -1,5 +1,26 @@
 import Foundation
 import Contacts
+import CoreGraphics
+import ImageIO
+
+func makeCircularImage(from data: Data, size: Int) -> Data? {
+  let s = CGFloat(size)
+  guard let source = CGImageSourceCreateWithData(data as CFData, nil),
+        let cgImage = CGImageSourceCreateImageAtIndex(source, 0, nil),
+        let ctx = CGContext(data: nil, width: size, height: size, bitsPerComponent: 8,
+                            bytesPerRow: 0, space: CGColorSpaceCreateDeviceRGB(),
+                            bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue) else { return nil }
+  let rect = CGRect(x: 0, y: 0, width: s, height: s)
+  ctx.addEllipse(in: rect)
+  ctx.clip()
+  ctx.draw(cgImage, in: rect)
+  guard let clipped = ctx.makeImage() else { return nil }
+  let outData = NSMutableData()
+  guard let destFinal = CGImageDestinationCreateWithData(outData, "public.png" as CFString, 1, nil) else { return nil }
+  CGImageDestinationAddImage(destFinal, clipped, nil)
+  guard CGImageDestinationFinalize(destFinal) else { return nil }
+  return outData as Data
+}
 
 // Image cache dir passed as first argument (environment.supportPath from Raycast)
 let imageDir = CommandLine.arguments.count > 1 ? CommandLine.arguments[1] : NSTemporaryDirectory()
@@ -45,6 +66,11 @@ do {
 
     var entry: [String: Any] = ["id": contact.identifier, "name": name, "phones": phones, "emails": emails]
 
+    // Include organization only when the contact has a real first/last name (org is supplementary)
+    if !firstName.isEmpty || !lastName.isEmpty, !org.isEmpty {
+      entry["organization"] = org
+    }
+
     // Save thumbnail to disk and return the path
     if contact.imageDataAvailable, let imageData = contact.thumbnailImageData {
       let safeId = contact.identifier.replacingOccurrences(of: "/", with: "_").replacingOccurrences(of: ":", with: "_")
@@ -53,6 +79,16 @@ do {
         try? imageData.write(to: imageURL)
       }
       entry["imagePath"] = imageURL.path
+
+      // Circular crop for detail pane
+      let circleURL = imageDirURL.appendingPathComponent("\(safeId)_circle.png")
+      if !FileManager.default.fileExists(atPath: circleURL.path),
+         let circleData = makeCircularImage(from: imageData, size: 160) {
+        try? circleData.write(to: circleURL)
+      }
+      if FileManager.default.fileExists(atPath: circleURL.path) {
+        entry["circleImagePath"] = circleURL.path
+      }
     }
 
     contacts.append(entry)

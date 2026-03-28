@@ -26,6 +26,8 @@ interface Contact {
   phones: ContactValue[];
   emails: ContactValue[];
   imagePath?: string;
+  circleImagePath?: string;
+  organization?: string;
 }
 
 // Uses a bundled Swift script that calls CNContactStore directly.
@@ -194,6 +196,38 @@ function contactSubtitle(contact: Contact): string {
   return "";
 }
 
+function getInitialsSvg(name: string): string {
+  const words = name.split(" ").filter(Boolean);
+  const initials =
+    words.length >= 2 ? (words[0][0] + words[1][0]).toUpperCase() : (words[0]?.[0] ?? "?").toUpperCase();
+  const colors = ["#FF6363", "#4A90D9", "#50C878", "#FF8C00", "#9B59B6", "#E91E8E", "#2AA198", "#5856D6"];
+  const hash = [...name].reduce((acc, c) => (acc * 31 + c.charCodeAt(0)) | 0, 0);
+  const bg = colors[Math.abs(hash) % colors.length];
+  const svg = [
+    `<svg xmlns="http://www.w3.org/2000/svg" width="300" height="80">`,
+    `<circle cx="150" cy="40" r="40" fill="${bg}"/>`,
+    `<text x="150" y="56" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,sans-serif" font-size="32" font-weight="500" fill="white">${initials}</text>`,
+    `</svg>`,
+  ].join("");
+  return `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`;
+}
+
+function getNameSvg(name: string, org?: string): string {
+  const escapedName = name.replace(/&/g, "&amp;").replace(/</g, "&lt;");
+  const hasOrg = org && org.length > 0;
+  const escapedOrg = hasOrg ? org.replace(/&/g, "&amp;").replace(/</g, "&lt;") : "";
+  const nameY = 16;
+  const orgY = nameY + 22;
+  const height = hasOrg ? orgY + 10 : nameY + 8;
+  const svg = [
+    `<svg xmlns="http://www.w3.org/2000/svg" width="300" height="${height}">`,
+    `<text x="150" y="${nameY}" text-anchor="middle" dy="0.35em" font-family="-apple-system,BlinkMacSystemFont,sans-serif" font-size="16" font-weight="600" fill="white">${escapedName}</text>`,
+    hasOrg ? `<text x="150" y="${orgY}" text-anchor="middle" dy="0.35em" font-family="-apple-system,BlinkMacSystemFont,sans-serif" font-size="13" font-weight="400" fill="#999">${escapedOrg}</text>` : "",
+    `</svg>`,
+  ].join("");
+  return `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`;
+}
+
 const FREQ_KEY = "contact-frequency";
 
 async function getFrequency(): Promise<Record<string, number>> {
@@ -316,17 +350,15 @@ export default function Command(props: { arguments: { contact?: string } }) {
         }
         detail={
           <List.Item.Detail
+            markdown={(() => {
+              const avatarImg = contact.circleImagePath
+                ? `file://${encodeURI(contact.circleImagePath)}?raycast-width=80&raycast-height=80`
+                : getInitialsSvg(contact.name);
+              const nameSvg = getNameSvg(contact.name, contact.organization);
+              return `![](${avatarImg})\n\n![](${nameSvg})`;
+            })()}
             metadata={
               <List.Item.Detail.Metadata>
-                <List.Item.Detail.Metadata.Label
-                  title={contact.name}
-                  icon={
-                    contact.imagePath
-                      ? { source: contact.imagePath, mask: Image.Mask.Circle }
-                      : getAvatarIcon(contact.name)
-                  }
-                />
-                <List.Item.Detail.Metadata.Separator />
                 {contact.phones.map((phone, i) => (
                   <List.Item.Detail.Metadata.Label
                     key={`phone-${i}`}
