@@ -438,6 +438,12 @@ export default function Command(props: { arguments: { contact?: string } }) {
                 target={`addressbook://${contact.id}`}
                 shortcut={{ modifiers: ["cmd"], key: "o" }}
               />
+              <Action.Open
+                title="Edit in Contacts"
+                icon={Icon.Pencil}
+                target={`addressbook://${contact.id}?edit`}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+              />
               <Action
                 title="Toggle Detail"
                 icon={Icon.Sidebar}
