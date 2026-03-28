@@ -263,6 +263,8 @@ export default function Command(props: { arguments: { contact?: string } }) {
     >
       {error ? (
         <List.EmptyView title="Could not load contacts" description={error} icon={Icon.Warning} />
+      ) : displayedContacts.length === 0 && !isLoading ? (
+        <List.EmptyView title="No contacts found" icon={Icon.MagnifyingGlass} />
       ) : (
         displayedContacts.map((contact) => (
           <List.Item
@@ -272,6 +274,14 @@ export default function Command(props: { arguments: { contact?: string } }) {
             icon={
               contact.imagePath ? { source: contact.imagePath, mask: Image.Mask.Circle } : getAvatarIcon(contact.name)
             }
+            accessories={[
+              ...(contact.phones.length > 0
+                ? [{ icon: Icon.Phone, tooltip: `${contact.phones.length} phone(s)` }]
+                : []),
+              ...(contact.emails.length > 0
+                ? [{ icon: Icon.Envelope, tooltip: `${contact.emails.length} email(s)` }]
+                : []),
+            ]}
             actions={
               <ActionPanel>
                 <ActionPanel.Section>
