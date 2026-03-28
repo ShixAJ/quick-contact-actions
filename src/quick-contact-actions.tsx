@@ -276,7 +276,7 @@ export default function Command(props: { arguments: { contact?: string } }) {
                     title="Call"
                     icon={Icon.Mobile}
                     target={`tel:${contact.phones[0].value.replace(/[^+\d]/g, "")}`}
-                    shortcut={{ modifiers: ["cmd"], key: "p" }}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
                   />
                 )}
                 {contact.phones.length > 0 && (
