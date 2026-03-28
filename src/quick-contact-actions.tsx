@@ -284,7 +284,7 @@ export default function Command(props: { arguments: { contact?: string } }) {
               <List.Item.Detail
                 markdown={
                   contact.imagePath
-                    ? `<img src="file://${encodeURI(contact.imagePath)}" width="64" height="64"> **${contact.name}**`
+                    ? `![](file://${encodeURI(contact.imagePath)})\n\n**${contact.name}**`
                     : `**${contact.name}**`
                 }
                 metadata={
