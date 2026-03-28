@@ -6,7 +6,6 @@ import {
   environment,
   Icon,
   Image,
-  LaunchProps,
   List,
   LocalStorage,
   useNavigation,
@@ -63,7 +62,7 @@ function ContactActions({ contact }: { contact: Contact }) {
                   <Action.Open
                     title="Start FaceTime Video"
                     icon={Icon.Video}
-                    target={`facetime://${p.value.replace(/[^+\d]/g, "")}`}
+                    target={`facetime://${p.value.replace(/\s/g, "")}`}
                   />
                   <Action.CopyToClipboard title="Copy Number" content={p.value} />
                 </ActionPanel>
@@ -100,7 +99,7 @@ function ContactActions({ contact }: { contact: Contact }) {
                   <Action.Open
                     title="Start FaceTime Audio"
                     icon={Icon.Phone}
-                    target={`facetime-audio://${p.value.replace(/[^+\d]/g, "")}`}
+                    target={`facetime-audio://${p.value.replace(/\s/g, "")}`}
                   />
                   <Action.CopyToClipboard title="Copy Number" content={p.value} />
                 </ActionPanel>
@@ -267,7 +266,7 @@ async function incrementFrequency(contactId: string): Promise<void> {
   await LocalStorage.setItem(FREQ_KEY, JSON.stringify(freq));
 }
 
-export default function Command(props: LaunchProps<{ arguments: Arguments.QuickContactActions }>) {
+export default function Command(props: { arguments: { contact?: string } }) {
   const contactArg = props.arguments.contact?.trim() ?? "";
   const [searchText, setSearchText] = useState(contactArg);
   const [contacts, setContacts] = useState<Contact[]>([]);
