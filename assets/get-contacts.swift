@@ -1,5 +1,6 @@
 import Foundation
 import Contacts
+import AppKit
 
 // Image cache dir passed as first argument (environment.supportPath from Raycast)
 let imageDir = CommandLine.arguments.count > 1 ? CommandLine.arguments[1] : NSTemporaryDirectory()
@@ -14,10 +15,12 @@ let keysToFetch: [CNKeyDescriptor] = [
   CNContactOrganizationNameKey as CNKeyDescriptor,
   CNContactPhoneNumbersKey as CNKeyDescriptor,
   CNContactEmailAddressesKey as CNKeyDescriptor,
+  CNContactImageDataAvailableKey as CNKeyDescriptor,
   CNContactThumbnailImageDataKey as CNKeyDescriptor,
 ]
 
 let request = CNContactFetchRequest(keysToFetch: keysToFetch)
+request.sortOrder = .givenName
 var contacts: [[String: Any]] = []
 
 do {
@@ -44,11 +47,27 @@ do {
     var entry: [String: Any] = ["id": contact.identifier, "name": name, "phones": phones, "emails": emails]
 
     // Save thumbnail to disk and return the path
-    if let imageData = contact.thumbnailImageData {
-      let safeId = contact.identifier.replacingOccurrences(of: "/", with: "_").replacingOccurrences(of: ":", with: "_")
-      let imageURL = imageDirURL.appendingPathComponent("\(safeId).jpg")
+    if contact.imageDataAvailable, let imageData = contact.thumbnailImageData {
+      let safeId = contact.identifier
+        .replacingOccurrences(of: "/", with: "_")
+        .replacingOccurrences(of: ":", with: "_")
+      let imageURL = imageDirURL.appendingPathComponent("\(safeId).png")
       if !FileManager.default.fileExists(atPath: imageURL.path) {
-        try? imageData.write(to: imageURL)
+        if let nsImage = NSImage(data: imageData) {
+          let size = min(nsImage.size.width, nsImage.size.height)
+          let cropSize = NSSize(width: size, height: size)
+          let circularImage = NSImage(size: cropSize)
+          circularImage.lockFocus()
+          let rect = NSRect(origin: .zero, size: cropSize)
+          NSBezierPath(ovalIn: rect).addClip()
+          nsImage.draw(in: rect, from: NSRect(origin: .zero, size: nsImage.size), operation: .sourceOver, fraction: 1.0)
+          circularImage.unlockFocus()
+          if let tiffData = circularImage.tiffRepresentation,
+             let bitmap = NSBitmapImageRep(data: tiffData),
+             let pngData = bitmap.representation(using: .png, properties: [:]) {
+            try? pngData.write(to: imageURL)
+          }
+        }
       }
       entry["imagePath"] = imageURL.path
     }
