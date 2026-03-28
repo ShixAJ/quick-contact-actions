@@ -290,14 +290,16 @@ export default function Command(props: { arguments: { contact?: string } }) {
             }
             detail={
               <List.Item.Detail
-                markdown={
-                  contact.imagePath
-                    ? `<img src="file://${encodeURI(contact.imagePath)}" width="80" />`
-                    : ""
-                }
                 metadata={
                   <List.Item.Detail.Metadata>
-                    <List.Item.Detail.Metadata.Label title="Name" text={contact.name} />
+                    <List.Item.Detail.Metadata.Label
+                      title={contact.name}
+                      icon={
+                        contact.imagePath
+                          ? { source: contact.imagePath, mask: Image.Mask.Circle }
+                          : getAvatarIcon(contact.name)
+                      }
+                    />
                     {contact.phones.length > 0 && (
                       <>
                         <List.Item.Detail.Metadata.Separator />
