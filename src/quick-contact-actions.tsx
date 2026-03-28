@@ -301,10 +301,10 @@ export default function Command(props: { arguments: { contact?: string } }) {
           !showDetail
             ? [
                 ...(contact.phones.length > 0
-                  ? [{ icon: Icon.Phone, tooltip: `${contact.phones.length} phone(s)` }]
+                  ? [{ tag: { value: contact.phones[0].label, color: Color.Orange } }]
                   : []),
                 ...(contact.emails.length > 0
-                  ? [{ icon: Icon.Envelope, tooltip: `${contact.emails.length} email(s)` }]
+                  ? [{ tag: { value: contact.emails[0].label, color: Color.Purple } }]
                   : []),
               ]
             : undefined
