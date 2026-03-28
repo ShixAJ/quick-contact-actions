@@ -51,6 +51,7 @@ function ContactActions({ contact }: { contact: Contact }) {
                     icon={Icon.Video}
                     target={`facetime://${p.value.replace(/\s/g, "")}`}
                   />
+                  <Action.CopyToClipboard title="Copy Number" content={p.value} />
                 </ActionPanel>
               }
             />
@@ -73,6 +74,7 @@ function ContactActions({ contact }: { contact: Contact }) {
                     icon={Icon.Phone}
                     target={`facetime-audio://${p.value.replace(/\s/g, "")}`}
                   />
+                  <Action.CopyToClipboard title="Copy Number" content={p.value} />
                 </ActionPanel>
               }
             />
@@ -90,6 +92,7 @@ function ContactActions({ contact }: { contact: Contact }) {
                     icon={Icon.Phone}
                     target={`facetime-audio://${e.value}`}
                   />
+                  <Action.CopyToClipboard title="Copy Email" content={e.value} />
                 </ActionPanel>
               }
             />
@@ -108,6 +111,7 @@ function ContactActions({ contact }: { contact: Contact }) {
               actions={
                 <ActionPanel>
                   <Action.Open title="Call" icon={Icon.Mobile} target={`tel:${p.value.replace(/[^+\d]/g, "")}`} />
+                  <Action.CopyToClipboard title="Copy Number" content={p.value} />
                 </ActionPanel>
               }
             />
@@ -130,6 +134,7 @@ function ContactActions({ contact }: { contact: Contact }) {
                     icon={Icon.Message}
                     target={`sms:${p.value.replace(/[^+\d]/g, "")}`}
                   />
+                  <Action.CopyToClipboard title="Copy Number" content={p.value} />
                 </ActionPanel>
               }
             />
@@ -148,6 +153,7 @@ function ContactActions({ contact }: { contact: Contact }) {
               actions={
                 <ActionPanel>
                   <Action.Open title="Send Email" icon={Icon.Envelope} target={`mailto:${e.value}`} />
+                  <Action.CopyToClipboard title="Copy Email" content={e.value} />
                 </ActionPanel>
               }
             />
@@ -260,7 +266,7 @@ export default function Command(props: { arguments: { contact?: string } }) {
                     title="FaceTime Video"
                     icon={Icon.Video}
                     target={`facetime://${contact.phones[0].value.replace(/\s/g, "")}`}
-                    shortcut={{ modifiers: ["cmd"], key: "f" }}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
                   />
                 )}
                 {contact.phones.length > 0 && (
@@ -268,7 +274,7 @@ export default function Command(props: { arguments: { contact?: string } }) {
                     title="FaceTime Audio"
                     icon={Icon.Phone}
                     target={`facetime-audio://${contact.phones[0].value.replace(/\s/g, "")}`}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
                   />
                 )}
                 {contact.phones.length > 0 && (
@@ -276,7 +282,7 @@ export default function Command(props: { arguments: { contact?: string } }) {
                     title="Call"
                     icon={Icon.Mobile}
                     target={`tel:${contact.phones[0].value.replace(/[^+\d]/g, "")}`}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
                   />
                 )}
                 {contact.phones.length > 0 && (
@@ -293,6 +299,25 @@ export default function Command(props: { arguments: { contact?: string } }) {
                     icon={Icon.Envelope}
                     target={`mailto:${contact.emails[0].value}`}
                     shortcut={{ modifiers: ["cmd"], key: "e" }}
+                  />
+                )}
+                <Action.CopyToClipboard
+                  title="Copy Name"
+                  content={contact.name}
+                  shortcut={{ modifiers: ["cmd"], key: "." }}
+                />
+                {contact.phones.length > 0 && (
+                  <Action.CopyToClipboard
+                    title="Copy Phone Number"
+                    content={contact.phones[0].value}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
+                  />
+                )}
+                {contact.emails.length > 0 && (
+                  <Action.CopyToClipboard
+                    title="Copy Email"
+                    content={contact.emails[0].value}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
                   />
                 )}
               </ActionPanel>
