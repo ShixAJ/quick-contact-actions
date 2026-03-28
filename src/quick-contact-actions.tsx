@@ -427,6 +427,8 @@ export default function Command(props: { arguments: { contact?: string } }) {
                   push(<ContactActions contact={contact} />);
                 }}
               />
+            </ActionPanel.Section>
+            <ActionPanel.Section title="Quick Actions">
               {contact.phones.length > 0 && (
                 <Action.Open
                   title="FaceTime Video"
@@ -467,9 +469,11 @@ export default function Command(props: { arguments: { contact?: string } }) {
                   shortcut={{ modifiers: ["cmd"], key: "e" }}
                 />
               )}
+            </ActionPanel.Section>
+            <ActionPanel.Section title="Contacts App">
               <Action
                 title="Open in Contacts"
-                icon={Icon.AddressBook}
+                icon={Icon.PersonCircle}
                 shortcut={{ modifiers: ["cmd"], key: "o" }}
                 onAction={() => {
                   execFile(
@@ -493,21 +497,6 @@ export default function Command(props: { arguments: { contact?: string } }) {
                   );
                 }}
               />
-              <Action
-                title="Toggle Detail"
-                icon={Icon.Sidebar}
-                onAction={() => setShowDetail((prev) => !prev)}
-                shortcut={{ modifiers: ["cmd"], key: "d" }}
-              />
-              <Action
-                title={favorites.has(contact.id) ? "Remove from Favorites" : "Add to Favorites"}
-                icon={Icon.Star}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
-                onAction={async () => {
-                  const updated = await toggleFavorite(contact.id);
-                  setFavorites(new Set(updated));
-                }}
-              />
             </ActionPanel.Section>
             <ActionPanel.Section title="Copy">
               <Action.CopyToClipboard
@@ -529,6 +518,23 @@ export default function Command(props: { arguments: { contact?: string } }) {
                   shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
                 />
               )}
+            </ActionPanel.Section>
+            <ActionPanel.Section title="View">
+              <Action
+                title="Toggle Detail"
+                icon={Icon.Sidebar}
+                onAction={() => setShowDetail((prev) => !prev)}
+                shortcut={{ modifiers: ["cmd"], key: "d" }}
+              />
+              <Action
+                title={favorites.has(contact.id) ? "Remove from Favorites" : "Add to Favorites"}
+                icon={Icon.Star}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+                onAction={async () => {
+                  const updated = await toggleFavorite(contact.id);
+                  setFavorites(new Set(updated));
+                }}
+              />
             </ActionPanel.Section>
           </ActionPanel>
         }
