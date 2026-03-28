@@ -224,17 +224,24 @@ export default function Command(props: { arguments: { contact?: string } }) {
   const didAutoNav = useRef(false);
 
   useEffect(() => {
-    const freqPromise = getFrequency().then(setFrequency);
+    const freqPromise = getFrequency();
 
     const cached = cache.get(CACHE_KEY);
     if (cached) {
       try {
-        setContacts(JSON.parse(cached));
-        freqPromise.then(() => setIsLoading(false));
+        const parsedContacts = JSON.parse(cached) as Contact[];
+        freqPromise.then((freq) => {
+          setFrequency(freq);
+          setContacts(parsedContacts);
+          setIsLoading(false);
+        });
       } catch {
-        /* ignore bad cache */
+        freqPromise.then(setFrequency);
       }
+    } else {
+      freqPromise.then(setFrequency);
     }
+
     fetchContacts()
       .then((fresh) => {
         setContacts(fresh);
