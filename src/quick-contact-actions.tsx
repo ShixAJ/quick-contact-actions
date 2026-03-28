@@ -323,15 +323,21 @@ export default function Command(props: { arguments: { contact?: string } }) {
                 />
                 <List.Item.Detail.Metadata.Separator />
                 {contact.phones.map((phone, i) => (
-                  <List.Item.Detail.Metadata.TagList key={`phone-${i}`} title={phone.value}>
-                    <List.Item.Detail.Metadata.TagList.Item text={phone.label} color={Color.Orange} />
-                  </List.Item.Detail.Metadata.TagList>
+                  <List.Item.Detail.Metadata.Label
+                    key={`phone-${i}`}
+                    title={phone.label}
+                    text={phone.value}
+                    icon={{ source: Icon.Phone, tintColor: Color.Orange }}
+                  />
                 ))}
                 {contact.phones.length > 0 && contact.emails.length > 0 && <List.Item.Detail.Metadata.Separator />}
                 {contact.emails.map((email, i) => (
-                  <List.Item.Detail.Metadata.TagList key={`email-${i}`} title={email.value}>
-                    <List.Item.Detail.Metadata.TagList.Item text={email.label} color={Color.Purple} />
-                  </List.Item.Detail.Metadata.TagList>
+                  <List.Item.Detail.Metadata.Label
+                    key={`email-${i}`}
+                    title={email.label}
+                    text={email.value}
+                    icon={{ source: Icon.Envelope, tintColor: Color.Purple }}
+                  />
                 ))}
               </List.Item.Detail.Metadata>
             }
