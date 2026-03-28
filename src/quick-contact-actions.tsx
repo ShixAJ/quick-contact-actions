@@ -158,6 +158,12 @@ function ContactActions({ contact }: { contact: Contact }) {
   );
 }
 
+function contactSubtitle(contact: Contact): string {
+  if (contact.phones.length > 0) return contact.phones[0].value;
+  if (contact.emails.length > 0) return contact.emails[0].value;
+  return "";
+}
+
 export default function Command(props: { arguments: { contact?: string } }) {
   const contactArg = props.arguments.contact?.trim() ?? "";
   const [searchText, setSearchText] = useState(contactArg);
@@ -186,7 +192,7 @@ export default function Command(props: { arguments: { contact?: string } }) {
   }, [isLoading, contacts]);
 
   // When searchText is controlled, Raycast disables built-in filtering — filter and rank manually.
-  // Score: 3 = exact, 2 = name starts with query, 1 = any word starts with query, 0 = substring anywhere.
+  // Score: 3 = exact name, 2 = name starts with, 1 = word starts with, 0 = name substring, -1 = phone/email match.
   const displayedContacts = searchText
     ? contacts
         .flatMap((c) => {
@@ -197,7 +203,12 @@ export default function Command(props: { arguments: { contact?: string } }) {
           else if (lower.startsWith(q)) score = 2;
           else if (lower.split(" ").some((w) => w.startsWith(q))) score = 1;
           else if (lower.includes(q)) score = 0;
-          else return [];
+          else {
+            const qDigits = q.replace(/\D/g, "");
+            if (qDigits.length >= 3 && c.phones.some((p) => p.value.replace(/\D/g, "").includes(qDigits))) score = -1;
+            else if (c.emails.some((e) => e.value.toLowerCase().includes(q))) score = -1;
+            else return [];
+          }
           return [{ contact: c, score }];
         })
         .sort((a, b) => b.score - a.score)
@@ -218,6 +229,7 @@ export default function Command(props: { arguments: { contact?: string } }) {
           <List.Item
             key={contact.id}
             title={contact.name}
+            subtitle={contactSubtitle(contact)}
             icon={
               contact.imagePath ? { source: contact.imagePath, mask: Image.Mask.Circle } : getAvatarIcon(contact.name)
             }
@@ -228,6 +240,46 @@ export default function Command(props: { arguments: { contact?: string } }) {
                   target={<ContactActions contact={contact} />}
                   icon={Icon.ChevronRight}
                 />
+                {contact.phones.length > 0 && (
+                  <Action.Open
+                    title="FaceTime Video"
+                    icon={Icon.Video}
+                    target={`facetime://${contact.phones[0].value.replace(/\s/g, "")}`}
+                    shortcut={{ modifiers: ["cmd"], key: "f" }}
+                  />
+                )}
+                {contact.phones.length > 0 && (
+                  <Action.Open
+                    title="FaceTime Audio"
+                    icon={Icon.Phone}
+                    target={`facetime-audio://${contact.phones[0].value.replace(/\s/g, "")}`}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
+                  />
+                )}
+                {contact.phones.length > 0 && (
+                  <Action.Open
+                    title="Call"
+                    icon={Icon.Mobile}
+                    target={`tel:${contact.phones[0].value.replace(/[^+\d]/g, "")}`}
+                    shortcut={{ modifiers: ["cmd"], key: "p" }}
+                  />
+                )}
+                {contact.phones.length > 0 && (
+                  <Action.Open
+                    title="Send Message"
+                    icon={Icon.Message}
+                    target={`sms:${contact.phones[0].value.replace(/[^+\d]/g, "")}`}
+                    shortcut={{ modifiers: ["cmd"], key: "m" }}
+                  />
+                )}
+                {contact.emails.length > 0 && (
+                  <Action.Open
+                    title="Send Email"
+                    icon={Icon.Envelope}
+                    target={`mailto:${contact.emails[0].value}`}
+                    shortcut={{ modifiers: ["cmd"], key: "e" }}
+                  />
+                )}
               </ActionPanel>
             }
           />
