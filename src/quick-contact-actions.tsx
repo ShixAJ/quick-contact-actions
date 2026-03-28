@@ -290,7 +290,7 @@ export default function Command(props: { arguments: { contact?: string } }) {
             }
             detail={
               <List.Item.Detail
-                markdown={contact.imagePath ? `![](${"file://" + contact.imagePath})` : ""}
+                markdown={contact.imagePath ? `![](file://${encodeURI(contact.imagePath)})` : ""}
                 metadata={
                   <List.Item.Detail.Metadata>
                     <List.Item.Detail.Metadata.Label title="Name" text={contact.name} />
