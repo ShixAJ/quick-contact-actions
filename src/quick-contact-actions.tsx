@@ -36,11 +36,11 @@ function ContactActions({ contact }: { contact: Contact }) {
 
   return (
     <List navigationTitle={contact.name} searchBarPlaceholder="Filter actions…">
-      {phones.length > 0 && (
+      {(phones.length > 0 || emails.length > 0) && (
         <List.Section title="FaceTime Video">
           {phones.map((p, i) => (
             <List.Item
-              key={`video-${i}`}
+              key={`video-p-${i}`}
               title={p.label}
               subtitle={p.value}
               icon={Icon.Video}
@@ -52,6 +52,24 @@ function ContactActions({ contact }: { contact: Contact }) {
                     target={`facetime://${p.value.replace(/\s/g, "")}`}
                   />
                   <Action.CopyToClipboard title="Copy Number" content={p.value} />
+                </ActionPanel>
+              }
+            />
+          ))}
+          {emails.map((e, i) => (
+            <List.Item
+              key={`video-e-${i}`}
+              title={e.label}
+              subtitle={e.value}
+              icon={Icon.Envelope}
+              actions={
+                <ActionPanel>
+                  <Action.Open
+                    title="Start FaceTime Video"
+                    icon={Icon.Video}
+                    target={`facetime://${e.value}`}
+                  />
+                  <Action.CopyToClipboard title="Copy Email" content={e.value} />
                 </ActionPanel>
               }
             />
