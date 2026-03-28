@@ -302,6 +302,12 @@ export default function Command(props: { arguments: { contact?: string } }) {
                       shortcut={{ modifiers: ["cmd"], key: "e" }}
                     />
                   )}
+                  <Action.Open
+                    title="Open in Contacts"
+                    icon={Icon.AddressBook}
+                    target={`addressbook://${contact.id}`}
+                    shortcut={{ modifiers: ["cmd"], key: "o" }}
+                  />
                 </ActionPanel.Section>
                 <ActionPanel.Section title="Copy">
                   <Action.CopyToClipboard
