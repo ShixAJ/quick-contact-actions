@@ -43,7 +43,7 @@ function ContactActions({ contact }: { contact: Contact }) {
               key={`video-p-${i}`}
               title={p.label}
               subtitle={p.value}
-              icon={Icon.Video}
+              icon={{ source: Icon.Video, tintColor: Color.Green }}
               actions={
                 <ActionPanel>
                   <Action.Open
@@ -61,7 +61,7 @@ function ContactActions({ contact }: { contact: Contact }) {
               key={`video-e-${i}`}
               title={e.label}
               subtitle={e.value}
-              icon={Icon.Envelope}
+              icon={{ source: Icon.Envelope, tintColor: Color.Green }}
               actions={
                 <ActionPanel>
                   <Action.Open title="Start FaceTime Video" icon={Icon.Video} target={`facetime://${e.value}`} />
@@ -80,7 +80,7 @@ function ContactActions({ contact }: { contact: Contact }) {
               key={`audio-p-${i}`}
               title={p.label}
               subtitle={p.value}
-              icon={Icon.Phone}
+              icon={{ source: Icon.Phone, tintColor: Color.Green }}
               actions={
                 <ActionPanel>
                   <Action.Open
@@ -98,7 +98,7 @@ function ContactActions({ contact }: { contact: Contact }) {
               key={`audio-e-${i}`}
               title={e.label}
               subtitle={e.value}
-              icon={Icon.Envelope}
+              icon={{ source: Icon.Envelope, tintColor: Color.Green }}
               actions={
                 <ActionPanel>
                   <Action.Open title="Start FaceTime Audio" icon={Icon.Phone} target={`facetime-audio://${e.value}`} />
@@ -117,7 +117,7 @@ function ContactActions({ contact }: { contact: Contact }) {
               key={`call-${i}`}
               title={p.label}
               subtitle={p.value}
-              icon={Icon.Mobile}
+              icon={{ source: Icon.Mobile, tintColor: Color.Orange }}
               actions={
                 <ActionPanel>
                   <Action.Open title="Call" icon={Icon.Mobile} target={`tel:${p.value.replace(/[^+\d]/g, "")}`} />
@@ -136,7 +136,7 @@ function ContactActions({ contact }: { contact: Contact }) {
               key={`sms-${i}`}
               title={p.label}
               subtitle={p.value}
-              icon={Icon.Message}
+              icon={{ source: Icon.Message, tintColor: Color.Blue }}
               actions={
                 <ActionPanel>
                   <Action.Open
@@ -159,7 +159,7 @@ function ContactActions({ contact }: { contact: Contact }) {
               key={`email-${i}`}
               title={e.label}
               subtitle={e.value}
-              icon={Icon.Envelope}
+              icon={{ source: Icon.Envelope, tintColor: Color.Purple }}
               actions={
                 <ActionPanel>
                   <Action.Open title="Send Email" icon={Icon.Envelope} target={`mailto:${e.value}`} />
