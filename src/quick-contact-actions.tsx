@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Cache, environment, Icon, Image, List, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Cache, Color, environment, Icon, Image, List, useNavigation } from "@raycast/api";
 import { getAvatarIcon } from "@raycast/utils";
 import { execFile } from "child_process";
 import { join } from "path";
@@ -197,6 +197,7 @@ export default function Command(props: { arguments: { contact?: string } }) {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | undefined>();
+  const [showDetail, setShowDetail] = useState(false);
   const { push } = useNavigation();
   const didAutoNav = useRef(false);
 
@@ -260,6 +261,7 @@ export default function Command(props: { arguments: { contact?: string } }) {
       searchText={searchText}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search contacts…"
+      isShowingDetail={showDetail}
     >
       {error ? (
         <List.EmptyView title="Could not load contacts" description={error} icon={Icon.Warning} />
@@ -270,18 +272,58 @@ export default function Command(props: { arguments: { contact?: string } }) {
           <List.Item
             key={contact.id}
             title={contact.name}
-            subtitle={contactSubtitle(contact)}
+            subtitle={!showDetail ? contactSubtitle(contact) : undefined}
             icon={
               contact.imagePath ? { source: contact.imagePath, mask: Image.Mask.Circle } : getAvatarIcon(contact.name)
             }
-            accessories={[
-              ...(contact.phones.length > 0
-                ? [{ icon: Icon.Phone, tooltip: `${contact.phones.length} phone(s)` }]
-                : []),
-              ...(contact.emails.length > 0
-                ? [{ icon: Icon.Envelope, tooltip: `${contact.emails.length} email(s)` }]
-                : []),
-            ]}
+            accessories={
+              !showDetail
+                ? [
+                    ...(contact.phones.length > 0
+                      ? [{ icon: Icon.Phone, tooltip: `${contact.phones.length} phone(s)` }]
+                      : []),
+                    ...(contact.emails.length > 0
+                      ? [{ icon: Icon.Envelope, tooltip: `${contact.emails.length} email(s)` }]
+                      : []),
+                  ]
+                : undefined
+            }
+            detail={
+              <List.Item.Detail
+                markdown={contact.imagePath ? `![](${"file://" + contact.imagePath})` : ""}
+                metadata={
+                  <List.Item.Detail.Metadata>
+                    <List.Item.Detail.Metadata.Label title="Name" text={contact.name} />
+                    {contact.phones.length > 0 && (
+                      <>
+                        <List.Item.Detail.Metadata.Separator />
+                        {contact.phones.map((phone, i) => (
+                          <List.Item.Detail.Metadata.Label
+                            key={`phone-${i}`}
+                            title={phone.label}
+                            text={phone.value}
+                            icon={{ source: Icon.Phone, tintColor: Color.Orange }}
+                          />
+                        ))}
+                      </>
+                    )}
+                    {contact.emails.length > 0 && (
+                      <>
+                        <List.Item.Detail.Metadata.Separator />
+                        {contact.emails.map((email, i) => (
+                          <List.Item.Detail.Metadata.Label
+                            key={`email-${i}`}
+                            title={email.label}
+                            text={email.value}
+                            icon={{ source: Icon.Envelope, tintColor: Color.Purple }}
+                          />
+                        ))}
+                      </>
+                    )}
+                  </List.Item.Detail.Metadata>
+                }
+              />
+            }
             actions={
               <ActionPanel>
                 <ActionPanel.Section>
@@ -335,6 +377,12 @@ export default function Command(props: { arguments: { contact?: string } }) {
                     icon={Icon.AddressBook}
                     target={`addressbook://${contact.id}`}
                     shortcut={{ modifiers: ["cmd"], key: "o" }}
+                  />
+                  <Action
+                    title="Toggle Detail"
+                    icon={Icon.Sidebar}
+                    onAction={() => setShowDetail((prev) => !prev)}
+                    shortcut={{ modifiers: ["cmd"], key: "d" }}
                   />
                 </ActionPanel.Section>
                 <ActionPanel.Section title="Copy">
